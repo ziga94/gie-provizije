@@ -144,6 +144,49 @@ tr.paid-row td{opacity:0.45;}
 .ctx-menu{position:fixed;background:var(--surface);border:0.5px solid var(--border2);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:500;padding:4px;min-width:160px;display:none;}
 .ctx-item{padding:8px 14px;font-size:13px;cursor:pointer;border-radius:4px;color:var(--text);}
 .ctx-item:hover{background:var(--pu-bg);color:var(--pu-text);}
+
+@media(max-width:768px){
+  header{padding:0.75rem 1rem;flex-wrap:wrap;gap:8px;}
+  .hdr-title{font-size:14px;}
+  .hdr-r{gap:4px;flex-wrap:wrap;}
+  .btn-sm{padding:5px 8px;font-size:11px;}
+  .btn-sm span,.btn-sm i+span{display:none;}
+  .container{padding:1rem 0.75rem;}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .metric{padding:0.75rem;}
+  .metric-value{font-size:17px;}
+  .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+  .vtab{padding:6px 12px;font-size:12px;white-space:nowrap;}
+  .add-form{padding:1rem;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-bottom{flex-direction:column;align-items:stretch;}
+  .form-bottom .btn{justify-content:center;}
+  .toolbar{flex-direction:column;gap:8px;}
+  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;}
+  .tab{padding:6px 10px;font-size:12px;white-space:nowrap;}
+  .table-wrap{border-radius:var(--radius);margin:0 -0.25rem;}
+  table{min-width:600px;font-size:13px;}
+  th,td{padding:8px 10px;}
+  .search-wrap{width:100%;}
+  .search-wrap input{width:100%;}
+  #client-filter{width:100%;}
+  .modal{padding:1.25rem;margin:0.5rem;}
+  .modal-btns{flex-direction:column;}
+  .team-grid{grid-template-columns:1fr;}
+  .login-card{padding:1.75rem 1.25rem;}
+  .user-btns{gap:6px;}
+  .user-btn{padding:10px 14px;}
+  .hdr-sub{display:none;}
+  #year-select{width:auto;}
+}
+@media(max-width:480px){
+  .metrics{grid-template-columns:1fr 1fr;}
+  .metric-value{font-size:15px;}
+  .metric-label{font-size:10px;}
+  table{min-width:500px;}
+  th,td{padding:6px 8px;font-size:12px;}
+}
+
 footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
 </style>
 </head>

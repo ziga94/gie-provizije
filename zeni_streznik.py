@@ -12,10 +12,59 @@ import os
 import urllib.request
 import urllib.error
 
-PORT = 8765
+
+DATA_FILE = "gie_data.json"
+
+def load_data():
+    """Nalozi podatke iz skupne JSON datoteke."""
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                return f.read()
+        except:
+            pass
+    return '[]'
+
+def save_data(data):
+    """Shrani podatke v skupno JSON datoteko."""
+    try:
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            f.write(data)
+        return True
+    except Exception as e:
+        print("  Napaka shranjevanja:", e)
+        return False
+
+PORT = int(os.environ.get("PORT", 8765))
+
+DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gie_data.json")
+
+def load_data():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                return f.read()
+        except:
+            pass
+    return '[]'
+
+def save_data(data):
+    try:
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            f.write(data)
+        return True
+    except Exception as e:
+        print("  Napaka shranjevanja:", e)
+        return False
+
+
 API_KEY_FILE = "gie_api_key.txt"
 
 def get_api_key():
+    # Try environment variable first (Railway)
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if key:
+        return key
     if os.path.exists(API_KEY_FILE):
         with open(API_KEY_FILE, 'r') as f:
             return f.read().strip()
@@ -83,6 +132,27 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Length', len(result))
+            self.end_headers()
+            self.wfile.write(result)
+
+        elif self.path == '/data':
+            # Return shared data
+            data = load_data()
+            result = data.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', len(result))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(result)
+
+        elif self.path == '/data':
+            data = load_data()
+            result = data.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', len(result))
+            self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(result)
 
@@ -421,6 +491,47 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(result)
 
+        elif self.path == '/save':
+            # Save shared data
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                req = json.loads(body)
+                data = req.get('data', '[]')
+                if save_data(data):
+                    result = json.dumps({'ok': True}).encode('utf-8')
+                    print("  Podatki shranjeni ({} B)".format(len(data)))
+                else:
+                    result = json.dumps({'ok': False}).encode('utf-8')
+            except Exception as e:
+                result = json.dumps({'ok': False, 'error': str(e)}).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', len(result))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(result)
+
+        elif self.path == '/save':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                req = json.loads(body)
+                data = req.get('data', '[]')
+                if save_data(data):
+                    result = json.dumps({'ok': True}).encode('utf-8')
+                    print("  Podatki shranjeni ({} vnosov)".format(len(json.loads(data))))
+                else:
+                    result = json.dumps({'ok': False}).encode('utf-8')
+            except Exception as e:
+                result = json.dumps({'ok': False, 'error': str(e)}).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', len(result))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(result)
+
         elif self.path == '/setkey':
             try:
                 length = int(self.headers.get('Content-Length', 0))
@@ -464,7 +575,7 @@ if __name__ == '__main__':
     print("=" * 50)
     print("")
 
-    server = http.server.HTTPServer(('localhost', PORT), Handler)
+    server = http.server.HTTPServer(('0.0.0.0', PORT), Handler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

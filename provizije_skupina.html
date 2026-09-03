@@ -840,6 +840,7 @@ function addEntry(){
   document.getElementById('prov-prev').style.display='none';
   document.getElementById('f-client').focus();
 }
+function delEntry(i){if(!confirm('Izbrisi ta vnos?'))return;entries.splice(i,1);save();render();}
 function togglePaid(i){
 var e=entries[i];
 // Irena - full control

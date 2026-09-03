@@ -646,7 +646,7 @@ document.getElementById('add-form').style.display=(!USERS[cu].ro&&(cview==='moje
     var html='';
     ['miha','ziga','gorazd'].forEach(function(uid){
       var mu=USERS[uid];
-      var ue=entries.filter(function(e){return e.owner===uid;});
+var ue=entries.filter(function(e){if(e.owner!==uid)return false;var y=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);return !y||y===cYear;});
       var tot=0,paid=0,ov=0;
       ue.forEach(function(e){if(!e.negotovo)tot+=e.commission||0;if(e.paid&&!e.negotovo)paid+=e.commission||0;if(od(e))ov++;});
       html+='<div class="member-card"><div class="member-header"><div class="av" style="background:'+mu.bg+';color:'+mu.color+';width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">'+mu.initial+'</div><div><div class="member-name">'+mu.name+'</div><div class="member-role">'+ue.length+' prodaj</div></div></div><div class="member-stats"><div class="mstat"><div class="mstat-label">Skupaj</div><div class="mstat-value">'+fmt(tot)+'</div></div><div class="mstat"><div class="mstat-label">Obdelano</div><div class="mstat-value c-pu">'+fmt(paid)+'</div></div><div class="mstat"><div class="mstat-label">Vneseno</div><div class="mstat-value c-am">'+fmt(tot-paid)+'</div></div><div class="mstat"><div class="mstat-label">Zamude</div><div class="mstat-value c-re">'+ov+'</div></div></div></div>';

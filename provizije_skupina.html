@@ -335,6 +335,7 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
             <option value="Nakup">Nakup (2.5%)</option>
           </select>
         </div>
+        <div class="field"><label>Dobavitelj</label><input id="f-supplier" type="text" value="Continental Semences" placeholder="Dobavitelj"></div>
         <div class="field"><label>Znesek racuna</label>
           <div class="calc-wrap">
             <div style="display:flex;gap:4px;">
@@ -417,6 +418,7 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
             <th>Znesek racuna</th>
             <th>Provizija</th>
             
+<th>Dobavitelj</th>
 <th style="min-width:110px;">Racun</th>
             <th>Datum</th>
             <th>Zapadlost</th>
@@ -710,6 +712,7 @@ thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="edi
     }
 thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="editCommission('+idx+',this)"')+' style="'+(e.negotovo?'color:#c0392b;font-weight:700;':'color:var(--pu-text);font-weight:600;')+'">'+fmt(e.commission)+commExtra+'</span></td>';
     
+thtml+='<td style="font-size:12px;color:var(--text2);">'+(e.supplier||'Continental Semences')+'</td>';
 thtml+='<td>'+(e.invoice?'<span style="font-family:monospace;font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:4px;">'+e.invoice+'</span>':'<span style="color:var(--text3);font-size:12px;">—</span>')+'</td>';
 thtml+='<td style="color:var(--text2);font-size:13px;">'+(isReadOnly?fmtD(e.date):'<span class="editable" onclick="editDate('+idx+',\'date\',this)">'+fmtD(e.date)+'</span>')+'</td>';
 thtml+='<td style="font-size:13px;'+(overdue?'color:var(--re-text);font-weight:500;':'')+'">'+( isReadOnly?fmtD(e.due):'<span class="editable" onclick="editDate('+idx+',\'due\',this)">'+fmtD(e.due)+'</span>')+'</td>';
@@ -770,6 +773,7 @@ function setDue(days){
 }
 function addEntry(){
   var client=document.getElementById('f-client').value.trim();
+var supplier=document.getElementById('f-supplier')?document.getElementById('f-supplier').value.trim():'Continental Semences';
   var product=document.getElementById('f-product').value;
   var currency=document.getElementById('f-currency')?document.getElementById('f-currency').value:'EUR';
   var amount=parseFloat(document.getElementById('f-amount').value);
@@ -788,7 +792,7 @@ function addEntry(){
       var amtEur=Math.round(amount/rate*100)/100;
       var commEur=Math.round(commissionOrig/rate*100)/100;
       var invoice2=document.getElementById('f-invoice')?document.getElementById('f-invoice').value.trim():'';
-      entries.unshift({id:Date.now(),owner:cu,client:client,product:product,amount:amtEur,commission:commEur,invoice:invoice2,date:date,due:due,paid:false,currency:currency,amount_orig:amount,exchange_rate:rate});
+      entries.unshift({id:Date.now(),owner:cu,client:client,product:product,amount:amtEur,commission:commEur,invoice:invoice2,date:date,due:due,paid:false,supplier:supplier,currency:currency,amount_orig:amount,exchange_rate:rate});
       save();render();
       document.getElementById('f-client').value='';
       document.getElementById('f-amount').value='';
@@ -797,6 +801,7 @@ function addEntry(){
       document.getElementById('f-date').valueAsDate=new Date();
       document.getElementById('prov-prev').style.display='none';
       if(document.getElementById('f-currency'))document.getElementById('f-currency').value='EUR';
+if(document.getElementById('f-supplier'))document.getElementById('f-supplier').value='Continental Semences';
       document.getElementById('f-client').focus();
     };
     if(_exRates[currency]){
@@ -1551,6 +1556,41 @@ function renderPregled(){
   }
   html+='<td style="text-align:right;padding:6px 8px;font-weight:700;font-size:11px;font-variant-numeric:tabular-nums;color:var(--pu-text);">'+fmt(grandTotal)+'</td>';
   html+='</tr></tbody></table></div>';
+
+  // Supplier summary for Irena
+  if(USERS[cu].ro){
+    var suppliers={};
+    entries.forEach(function(e){
+      var ey=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);
+      if(ey&&ey!==year)return;
+      var s=e.supplier||'Continental Semences';
+      if(!suppliers[s])suppliers[s]={count:0,totalComm:0,paid:0,narejen:0};
+      suppliers[s].count++;
+      suppliers[s].totalComm+=e.commission||0;
+      if(e.paid)suppliers[s].paid+=e.commission||0;
+      if(e.narejen)suppliers[s].narejen+=e.commission||0;
+    });
+    html+='<div style="margin-top:1.5rem;background:rgba(255,255,255,0.88);border-radius:var(--radius);overflow:hidden;">';
+    html+='<div style="padding:1rem 1.25rem;border-bottom:0.5px solid var(--border);font-size:15px;font-weight:600;">Racuni za provizijo po dobavitelju</div>';
+    html+='<table style="width:100%;border-collapse:collapse;"><thead><tr>';
+    ['Dobavitelj','Stevilo racunov','Skupaj provizija','Obdelano','Narejen racun','Preostalo'].forEach(function(h){
+      html+='<th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text2);border-bottom:0.5px solid var(--border);background:var(--surface2);text-transform:uppercase;">'+h+'</th>';
+    });
+    html+='</tr></thead><tbody>';
+    Object.keys(suppliers).sort().forEach(function(s){
+      var d=suppliers[s];
+      var preostalo=d.totalComm-d.paid-d.narejen;
+      html+='<tr>';
+      html+='<td style="padding:10px 14px;font-weight:600;">'+s+'</td>';
+      html+='<td style="padding:10px 14px;">'+d.count+'</td>';
+      html+='<td style="padding:10px 14px;font-weight:600;color:var(--pu-text);">'+fmt(d.totalComm)+'</td>';
+      html+='<td style="padding:10px 14px;color:var(--gr-text);">'+fmt(d.paid)+'</td>';
+      html+='<td style="padding:10px 14px;color:var(--am-text);">'+fmt(d.narejen)+'</td>';
+      html+='<td style="padding:10px 14px;color:var(--re-text);">'+fmt(preostalo>0?preostalo:0)+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+  }
   document.getElementById('pregled-wrap').innerHTML=html;
 }
 function filterPregledMain(){

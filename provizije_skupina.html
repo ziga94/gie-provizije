@@ -670,7 +670,7 @@ document.getElementById('metrics').innerHTML=
   +'<div class="metric"><div class="metric-label">Obdelano</div><div class="metric-value c-pu">'+fmt(paid)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Vneseno</div><div class="metric-value c-am">'+fmt(vnesenoAmt)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Narejen racun</div><div class="metric-value c-re">'+fmt(narejenAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+narejen+' vnosov</div></div>'
-  +((!USERS[cu].ro)&&!(cu==='gorazd'&&cview==='vse')?'<div class="metric"><div class="metric-label">&#9888; Negotovo</div><div class="metric-value" style="color:#e65100;">'+fmt(negAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+negCnt+' vnosov</div></div>':'');
+  +((!USERS[cu].ro)?'<div class="metric"><div class="metric-label">&#9888; Negotovo</div><div class="metric-value" style="color:#e65100;">'+fmt(negAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+negCnt+' vnosov</div></div>':'');
 var cf=document.getElementById('client-filter');
   if(cf){
     var curVal=cf.value;

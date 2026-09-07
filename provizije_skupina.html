@@ -720,7 +720,7 @@ var canClickStatus=!isReadOnly||(cu==='gorazd'&&e.owner!==cu);
 thtml+='<td><button class="badge '+statusClass+'"'+(canClickStatus?' onclick="togglePaid('+idx+')" oncontextmenu="showCtxMenu(event,'+idx+')"':'')+' ><i class="ti ti-'+statusIcon+'"></i> '+statusLabel+'</button>'+(isReadOnly?'':(e.negotovo?'<button style="background:#fff3e0;color:#e65100;border:none;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:500;cursor:pointer;margin-left:4px;" onclick="toggleNegotovo('+idx+')">&#9888; Negotovo</button>':'<button onclick="toggleNegotovo('+idx+')" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 6px;font-size:13px;">&#9888;</button>'))+'</td>';
 var attHtml=e.attachment?'<button class="attach-open" onclick="openAttach('+idx+')" title="'+e.attachment.name+'" style="font-size:11px;border:none;"><i class="ti ti-paperclip" style="font-size:11px"></i> '+e.attachment.name.slice(0,5)+'</button>'+(isReadOnly?'':'<button class="attach-del" onclick="removeAttach('+idx+')"><i class="ti ti-x"></i></button>'):(isReadOnly?'':'<button class="attach-btn" onclick="pickAttach('+idx+')"><i class="ti ti-paperclip" style="font-size:13px"></i> Pripni</button>');
     thtml+='<td>'+attHtml+'</td>';
-thtml+='<td>'+(isReadOnly?'':'<button class="icon-btn" onclick="delEntry('+idx+')"><i class="ti ti-trash"></i></button>')+'</td>';
+thtml+='<td>'+(e.owner===cu&&!USERS[cu].ro?'<button class="icon-btn" onclick="delEntry('+idx+')"><i class="ti ti-trash"></i></button>':'')+'</td>';
     thtml+='</tr>';
   });
   tbody.innerHTML=thtml;

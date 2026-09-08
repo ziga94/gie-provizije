@@ -86,7 +86,7 @@ header{background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);border-botto
 .search-wrap i{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;}
 .search-wrap input{padding:7px 10px 7px 28px;font-size:13px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:rgba(255,255,255,0.85);color:var(--text);font-family:inherit;}
 .table-wrap{background:rgba(255,255,255,0.88);border-radius:var(--radius);overflow:hidden;overflow-x:auto;}
-table{width:100%;border-collapse:collapse;min-width:750px;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
 th{text-align:left;padding:9px 13px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border);background:var(--surface2);white-space:nowrap;text-transform:uppercase;letter-spacing:0.04em;}
 td{padding:11px 13px;border-bottom:0.5px solid var(--border);color:var(--text);vertical-align:middle;font-size:14px;}
 tr:last-child td{border-bottom:none;}
@@ -413,13 +413,12 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
         <thead>
           <tr>
             <th id="th-owner" style="display:none;">Prodajalec</th>
-            <th style="min-width:160px;">Stranka</th>
+            <th style="min-width:120px;">Stranka</th>
             <th>Produkt</th>
             <th>Znesek racuna</th>
             <th>Provizija</th>
             
-<th style="min-width:80px;max-width:120px;">Dobavitelj</th>
-<th style="min-width:110px;">Racun</th>
+<th style="min-width:80px;">Racun</th>
             <th>Datum</th>
             <th>Zapadlost</th>
             <th>Status</th>
@@ -712,8 +711,7 @@ thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="edi
     }
 thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="editCommission('+idx+',this)"')+' style="'+(e.negotovo?'color:#c0392b;font-weight:700;':'color:var(--pu-text);font-weight:600;')+'">'+fmt(e.commission)+commExtra+'</span></td>';
     
-thtml+='<td style="font-size:11px;max-width:100px;">'+(isReadOnly?'<span style="color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:90px;" title="'+(e.supplier||'Continental Semences')+'">'+(e.supplier||'Cont. Sem.')+'</span>':'<span class="editable" onclick="editSupplierMain('+idx+',this)" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:90px;" title="'+(e.supplier||'Continental Semences')+'">'+(e.supplier||'Cont. Sem.')+'</span>')+'</td>';
-thtml+='<td>'+(e.invoice?'<span style="font-family:monospace;font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:4px;">'+e.invoice+'</span>':'<span style="color:var(--text3);font-size:12px;">—</span>')+'</td>';
+thtml+='<td>'+(e.invoice?'<span style="font-family:monospace;font-size:12px;background:var(--surface2);padding:2px 6px;border-radius:4px;">'+e.invoice.slice(0,8)+'</span>':'<span style="color:var(--text3);font-size:12px;">—</span>')+'</td>';
 thtml+='<td style="color:var(--text2);font-size:13px;">'+(isReadOnly?fmtD(e.date):'<span class="editable" onclick="editDate('+idx+',\'date\',this)">'+fmtD(e.date)+'</span>')+'</td>';
 thtml+='<td style="font-size:13px;'+(overdue?'color:var(--re-text);font-weight:500;':'')+'">'+( isReadOnly?fmtD(e.due):'<span class="editable" onclick="editDate('+idx+',\'due\',this)">'+fmtD(e.due)+'</span>')+'</td>';
 var canClickStatus=!isReadOnly||(cu==='gorazd'&&e.owner!==cu);

@@ -727,7 +727,19 @@ thtml+='<td>'+(e.owner===cu&&!USERS[cu].ro?'<button class="icon-btn" onclick="de
 }
 var _exRates={};
 function askManualRate(curr,callback){
-  var r=parseFloat(prompt('Vnesi tecaj 1 '+curr+' = ? EUR (npr. USD: 0.92):',''));
+function askManualRate(curr,callback){
+  // Known approximate rates as defaults
+  var knownRates={'USD':0.92,'GBP':1.17,'CHF':1.04,'SEK':0.086,'DKK':0.134,'NOK':0.087,'TRY':0.026};
+  var defaultRate=knownRates[curr]||'';
+  // Open Google for current rate
+  window.open('https://www.google.com/search?q=1+'+curr+'+to+EUR','_blank');
+  var r=parseFloat(prompt('Vnesi tecaj 1 '+curr+' = ? EUR\n(Preverite v odprtem zavihku Google)\n\nPrivzeta vrednost: '+(defaultRate?defaultRate:''), defaultRate||''));
+  if(!isNaN(r)&&r>0){
+    _exRates[curr]=1/r;
+    if(callback)callback(_exRates[curr]);
+    else updatePrev();
+  }
+}
   if(!isNaN(r)&&r>0){
     _exRates[curr]=1/r;
     if(callback)callback(_exRates[curr]);

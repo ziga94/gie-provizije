@@ -658,7 +658,7 @@ if(e.attachment&&!e.paid&&!e.narejen&&!e.negotovo)racunDodanAmt+=e.commission||0
   }else{tg.style.display='none';}
 var tot=0,paid=0,ov=0,narejenAmt=0,narejen=0,vnesenoOnlyAmt=0,racunDodanAmt=0;
   ve.forEach(function(e){
-tot+=e.commission||0;
+    if(!e.negotovo)tot+=e.commission||0;
     if(e.paid&&!e.narejen)paid+=e.commission||0;
     if(od(e))ov++;
     if(e.narejen){narejen++;narejenAmt+=e.commission||0;}

@@ -746,8 +746,8 @@ function updatePrev(){
         fetch('http://localhost:8765/rate/'+curr)
         .then(function(r){return r.json();})
         .then(function(d){
-          if(d.rate){
-            _exRates[curr]=1/d.rate;
+          if(d.rates&&d.rates.EUR){
+            _exRates[curr]=1/d.rates.EUR;
             updatePrev();
           }
         })
@@ -810,7 +810,7 @@ if(document.getElementById('f-supplier'))document.getElementById('f-supplier').v
       fetch('http://localhost:8765/rate/'+currency)
       .then(function(r){return r.json();})
       .then(function(d){
-        if(d.rate){_exRates[currency]=1/d.rate;doAdd(_exRates[currency]);}
+        if(d.rates&&d.rates.EUR){_exRates[currency]=1/d.rates.EUR;doAdd(_exRates[currency]);}
         else{alert('Napaka pri pridobivanju tecaja.');};
       })
       .catch(function(){alert('Ni interneta za tecaj.');});

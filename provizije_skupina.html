@@ -649,19 +649,21 @@ document.getElementById('add-form').style.display=(!USERS[cu].ro&&(cview==='moje
       var mu=USERS[uid];
 var ue=entries.filter(function(e){if(e.owner!==uid)return false;var y=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);return !y||y===cYear;});
       var tot=0,paid=0,ov=0;
-      ue.forEach(function(e){if(!e.negotovo)tot+=e.commission||0;if(e.paid&&!e.negotovo)paid+=e.commission||0;if(od(e))ov++;});
+if(od(e))ov++;
+if(!e.paid&&!e.narejen&&!e.attachment&&!e.negotovo)vnesenoOnlyAmt+=e.commission||0;
+if(e.attachment&&!e.paid&&!e.narejen&&!e.negotovo)racunDodanAmt+=e.commission||0;
       html+='<div class="member-card"><div class="member-header"><div class="av" style="background:'+mu.bg+';color:'+mu.color+';width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;">'+mu.initial+'</div><div><div class="member-name">'+mu.name+'</div><div class="member-role">'+ue.length+' prodaj</div></div></div><div class="member-stats"><div class="mstat"><div class="mstat-label">Skupaj</div><div class="mstat-value">'+fmt(tot)+'</div></div><div class="mstat"><div class="mstat-label">Obdelano</div><div class="mstat-value c-pu">'+fmt(paid)+'</div></div><div class="mstat"><div class="mstat-label">Vneseno</div><div class="mstat-value c-am">'+fmt(tot-paid)+'</div></div><div class="mstat"><div class="mstat-label">Zamude</div><div class="mstat-value c-re">'+ov+'</div></div></div></div>';
     });
     tg.innerHTML=html;
   }else{tg.style.display='none';}
-  var tot=0,paid=0,ov=0,narejenAmt=0,narejen=0;
+var tot=0,paid=0,ov=0,narejenAmt=0,narejen=0,vnesenoOnlyAmt=0,racunDodanAmt=0;
   ve.forEach(function(e){
 if(!e.negotovo)tot+=e.commission||0;
     if(e.paid)paid+=e.commission||0;
     if(od(e))ov++;
     if(e.narejen){narejen++;narejenAmt+=e.commission||0;}
   });
-var vnesenoAmt=ve.reduce(function(s,e){return s+(e.commission||0);},0);
+var vnesenoAmt=vnesenoOnlyAmt;
 var negAmt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).reduce(function(s,e){return s+(e.commission||0);},0);
 var negCnt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).length;
 
@@ -669,7 +671,7 @@ var negCnt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).lengt
 document.getElementById('metrics').innerHTML=
   '<div class="metric"><div class="metric-label">Skupaj</div><div class="metric-value">'+fmt(tot)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Obdelano</div><div class="metric-value c-pu">'+fmt(paid)+'</div></div>'
-  +'<div class="metric"><div class="metric-label">Vneseno skupaj</div><div class="metric-value c-am">'+fmt(vnesenoAmt)+'</div></div>'
+  +'<div class="metric"><div class="metric-label">Vneseno</div><div class="metric-value c-am">'+fmt(vnesenoAmt)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Narejen racun</div><div class="metric-value c-re">'+fmt(narejenAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+narejen+' vnosov</div></div>'
   +((!USERS[cu].ro)?'<div class="metric"><div class="metric-label">&#9888; Negotovo</div><div class="metric-value" style="color:#e65100;">'+fmt(negAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+negCnt+' vnosov</div></div>':'');
 var cf=document.getElementById('client-filter');

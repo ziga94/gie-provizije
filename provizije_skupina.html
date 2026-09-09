@@ -1572,8 +1572,19 @@ function renderPregled(){
     html+='<td style="text-align:right;padding:6px 4px;font-weight:600;font-size:11px;font-variant-numeric:tabular-nums;cursor:pointer;'+(isCur?'background:var(--pu-bg);':'')+'" onclick="openPregledMonth('+m+')">'+(totals[m]>0?fmt(totals[m]):'<span style="color:var(--text3)">—</span>')+'</td>';
   }
   html+='<td style="text-align:right;padding:6px 8px;font-weight:700;font-size:11px;font-variant-numeric:tabular-nums;color:var(--pu-text);">'+fmt(grandTotal)+'</td>';
-  html+='</tr></tbody></table></div>';
-
+html+='</tr>';
+// Cumulative row
+if(cu==='gorazd'||cu==='ziga'||cu==='miha'){
+  html+='<tr style="background:var(--pu-bg);">';
+  html+='<td style="padding:6px 10px;font-weight:600;font-size:12px;color:var(--pu-text);">Kumulativa</td>';
+  var cum=0;
+  for(var mc=0;mc<12;mc++){
+    var isCurC=mc===curMonth;
+    cum+=totals[mc];
+    html+='<td style="text-align:right;padding:6px 4px;font-weight:600;font-size:11px;font-variant-numeric:tabular-nums;color:var(--pu-text);'+(isCurC?'background:rgba(123,63,160,0.15);':'')+'">'+fmt(cum)+'</td>';
+  }
+  html+='<td style="padding:6px 8px;"></td></tr>';
+}
   // Supplier summary for Irena
   if(USERS[cu].ro){
     var suppliers={};

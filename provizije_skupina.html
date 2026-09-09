@@ -748,18 +748,10 @@ function updatePrev(){
         var rate=_exRates[curr];
         var amtEur=Math.round(amt/rate*100)/100;
         var commEur=Math.round(commOrig/rate*100)/100;
-        el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' = '+fmt(commEur)+' | Znesek: '+amt.toFixed(2)+' '+curr+' = '+fmt(amtEur)+' (tecaj: '+rate.toFixed(4)+')';
+        el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' = '+fmt(commEur)+' | Znesek: '+amt.toFixed(2)+' '+curr+' = '+fmt(amtEur);
       }else{
-        el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' ('+pct+'%) | Iskanje tecaja...';
-        fetch('http://localhost:8765/rate/'+curr)
-        .then(function(r){return r.json();})
-        .then(function(d){
-          if(d.rates&&d.rates.EUR){
-            _exRates[curr]=1/d.rates.EUR;
-            updatePrev();
-          }
-        })
-        .catch(function(){el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' ('+pct+'%)';});
+        el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' ('+pct+'%)';
+        askManualRate(curr);
       }
     }else{
       el.textContent='Provizija: '+fmt(commOrig)+' ('+pct+'%)';

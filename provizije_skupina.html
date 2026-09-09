@@ -663,7 +663,7 @@ var tot=0,paid=0,ov=0,narejenAmt=0,narejen=0,vnesenoOnlyAmt=0,racunDodanAmt=0;
     if(od(e))ov++;
     if(e.narejen){narejen++;narejenAmt+=e.commission||0;}
   });
-var vnesenoAmt=ve.filter(function(e){return !e.paid&&!e.narejen&&!e.attachment&&!od(e)&&!e.negotovo;}).reduce(function(s,e){return s+(e.commission||0);},0);
+var vnesenoAmt=ve.filter(function(e){return !e.paid&&!e.narejen&&!e.negotovo;}).reduce(function(s,e){return s+(e.commission||0);},0);
 var negAmt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).reduce(function(s,e){return s+(e.commission||0);},0);
 var negCnt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).length;
 

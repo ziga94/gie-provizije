@@ -726,6 +726,10 @@ thtml+='<td>'+(e.owner===cu&&!USERS[cu].ro?'<button class="icon-btn" onclick="de
   tbody.innerHTML=thtml;
 }
 var _exRates={};
+function askManualRate(curr){
+  var r=parseFloat(prompt('Vnesi tecaj '+curr+'/EUR (npr. za 1 USD = 0.92 EUR vpisi 0.92):',''));
+  if(!isNaN(r)&&r>0){_exRates[curr]=1/r;updatePrev();}
+}
 function updatePrev(){
   var amt=parseFloat(document.getElementById('f-amount').value);
   var prod=document.getElementById('f-product').value;

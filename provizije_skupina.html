@@ -661,15 +661,15 @@ if(!e.negotovo)tot+=e.commission||0;
     if(od(e))ov++;
     if(e.narejen){narejen++;narejenAmt+=e.commission||0;}
   });
-  var vnesenoAmt=ve.filter(function(e){return !e.paid&&!e.narejen&&!e.attachment&&!od(e);}).reduce(function(s,e){return s+(e.commission||0);},0);
-  var negAmt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).reduce(function(s,e){return s+(e.commission||0);},0);
-  var negCnt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).length;
-  var negAmt=ve.filter(function(e2){return e2.negotovo&&!e2.paid&&!e2.narejen;}).reduce(function(s2,e2){return s2+(e2.commission||0);},0);
-  var negCnt=ve.filter(function(e2){return e2.negotovo&&!e2.paid&&!e2.narejen;}).length;
+var vnesenoAmt=ve.reduce(function(s,e){return s+(e.commission||0);},0);
+var negAmt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).reduce(function(s,e){return s+(e.commission||0);},0);
+var negCnt=ve.filter(function(e){return e.negotovo&&!e.paid&&!e.narejen;}).length;
+
+
 document.getElementById('metrics').innerHTML=
   '<div class="metric"><div class="metric-label">Skupaj</div><div class="metric-value">'+fmt(tot)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Obdelano</div><div class="metric-value c-pu">'+fmt(paid)+'</div></div>'
-  +'<div class="metric"><div class="metric-label">Vneseno</div><div class="metric-value c-am">'+fmt(vnesenoAmt)+'</div></div>'
+  +'<div class="metric"><div class="metric-label">Vneseno skupaj</div><div class="metric-value c-am">'+fmt(vnesenoAmt)+'</div></div>'
   +'<div class="metric"><div class="metric-label">Narejen racun</div><div class="metric-value c-re">'+fmt(narejenAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+narejen+' vnosov</div></div>'
   +((!USERS[cu].ro)?'<div class="metric"><div class="metric-label">&#9888; Negotovo</div><div class="metric-value" style="color:#e65100;">'+fmt(negAmt)+'</div><div style="font-size:11px;color:var(--text3);">'+negCnt+' vnosov</div></div>':'');
 var cf=document.getElementById('client-filter');

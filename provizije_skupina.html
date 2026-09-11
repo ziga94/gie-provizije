@@ -244,6 +244,8 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
         <option value="Forage/Turf">Forage / Turf (3%)</option>
         <option value="Mixture">Mixture (5%)</option>
         <option value="Nakup">Nakup (2.5%)</option>
+        <option value="2%">2%</option>
+        <option value="Rocno">Ročno %</option>
       </select>
     </div>
     <div class="modal-msg" id="qi-msg"></div>
@@ -329,13 +331,14 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
           </div>
         </div>
         <div class="field"><label>Produkt</label>
-          <select id="f-product" onchange="updatePrev()">
+          <select id="f-product" onchange="updatePrev();var rw=document.getElementById('rocno-wrap');if(rw)rw.style.display=this.value==='Rocno'?'':' none';">
             <option value="Forage/Turf">Forage / Turf (3%)</option>
             <option value="Mixture">Mixture (5%)</option>
             <option value="Nakup">Nakup (2.5%)</option>
           </select>
         </div>
         <div class="field"><label>Dobavitelj</label><input id="f-supplier" type="text" value="Continental Semences" placeholder="Dobavitelj"></div>
+        <div class="field" id="rocno-wrap" style="display:none;"><label>Ročni % provizije</label><input id="f-rocno" type="number" min="0" max="100" step="0.1" placeholder="npr. 4.5" oninput="updatePrev()"></div>
         <div class="field"><label>Znesek racuna</label>
           <div class="calc-wrap">
             <div style="display:flex;gap:4px;">
@@ -442,7 +445,7 @@ var USERS = {
   gorazd: {name:'Gorazd',pass:'Gorazd2000',color:'#854f0b',bg:'#faeeda',initial:'G',admin:true, ro:false},
   irena:  {name:'Irena', pass:'Irena2000', color:'#185fa5',bg:'#e6f1fb',initial:'I',admin:true, ro:true}
 };
-var PROD = {'Forage/Turf':3,'Mixture':5,'Nakup':2.5,'Mesano':0};
+var PROD = {'Forage/Turf':3,'Mixture':5,'Nakup':2.5,'Mesano':0,'2%':2,'Rocno':0};
 var cu=null, selU=null, cview='moje', cfilter='vse', cYear=new Date().getFullYear();
 var entries=[];
 var _lastSave=0, _saveVer=0, _knownVer=0;
@@ -750,7 +753,7 @@ function updatePrev(){
   var amt=parseFloat(document.getElementById('f-amount').value);
   var prod=document.getElementById('f-product').value;
   var curr=document.getElementById('f-currency')?document.getElementById('f-currency').value:'EUR';
-  var pct=PROD[prod]||0;
+  var pct=prod==='Rocno'?(parseFloat(document.getElementById('f-rocno')?document.getElementById('f-rocno').value:0)||0):(PROD[prod]||0);
   var el=document.getElementById('prov-prev');
   if(!isNaN(amt)&&amt>0){
     el.style.display='inline-flex';
@@ -797,7 +800,7 @@ var supplier=document.getElementById('f-supplier')?document.getElementById('f-su
     var dup=entries.find(function(e){return e.invoice&&e.invoice.trim().toLowerCase()===invoice.trim().toLowerCase();});
     if(dup){alert('Racun '+invoice+' je ze vnesen! (Stranka: '+(dup.client||'—')+')');return;}
   }
-  var pct=PROD[product]||0;
+  var pct=product==='Rocno'?(parseFloat(document.getElementById('f-rocno')?document.getElementById('f-rocno').value:0)||0):(PROD[product]||0);
   var commissionOrig=isNaN(amount)?0:Math.round(amount*pct*100)/10000;
   if(currency!=='EUR'){
     var doAdd=function(rate){

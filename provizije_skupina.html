@@ -655,7 +655,7 @@ document.getElementById('add-form').style.display=(!USERS[cu].ro&&(cview==='moje
     var html='';
     ['miha','ziga','gorazd'].forEach(function(uid){
       var mu=USERS[uid];
-var ue=entries.filter(function(e){if(e.owner!==uid)return false;var y=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);return !y||y===cYear;});
+var ue=entries.filter(function(e){return e.owner===uid;});
 var tot=0,paid=0,ov=0,narejenAmt=0,narejen=0;
 if(od(e))ov++;
 if(!e.paid&&!e.narejen&&!e.attachment&&!e.negotovo)vnesenoOnlyAmt+=e.commission||0;

@@ -244,7 +244,7 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
         <option value="Forage/Turf">Forage / Turf (3%)</option>
         <option value="Mixture">Mixture (5%)</option>
         <option value="Nakup">Nakup (2.5%)</option>
-        <option value="2%">2%</option>
+        <option value="2%">Commission (2%)</option>
         <option value="Rocno">Ročno %</option>
       </select>
     </div>
@@ -336,7 +336,7 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
             <option value="Mixture">Mixture (5%)</option>
             <option value="Nakup">Nakup (2.5%)</option>
 <option value="Nakup">Nakup (2.5%)</option>
-<option value="2%">2%</option>
+<option value="2%">Commission (2%)</option>
 <option value="Rocno">Ročno %</option>
         </div>
         <div class="field"><label>Dobavitelj</label><input id="f-supplier" type="text" value="Continental Semences" placeholder="Dobavitelj"></div>
@@ -532,24 +532,27 @@ function openAttach(i){
   if(!e.attachment)return;
   var data=getAttachData(e);
   if(!data){alert('Priponka ni najdena.');return;}
-  if(data.startsWith('http')){window.open(data,'_blank');return;}
-  var a=document.createElement('a');
-  a.href=data;
-  a.download=e.attachment.name;
-  a.click();
+  if(data.startsWith('http')){
+    if(data.indexOf('/get-attachment/')>=0){window.open(data,'_blank');return;}
+    var idx=data.indexOf('/racuni/');
+    if(idx>=0){window.open('http://localhost:8765/racuni/'+data.substring(idx+8),'_blank');return;}
+    window.open(data,'_blank');return;
+  }
+  var a=document.createElement('a');a.href=data;a.download=e.attachment.name;a.click();
 }
 function openAttachByIdx(i){
   var e=entries[i];
   if(!e.attachment)return;
   var data=getAttachData(e);
   if(!data){alert('Priponka ni najdena.');return;}
-  if(data.startsWith('http')){window.open(data,'_blank');return;}
-  var a=document.createElement('a');
-  a.href=data;
-  a.download=e.attachment.name;
-  a.click();
+  if(data.startsWith('http')){
+    if(data.indexOf('/get-attachment/')>=0){window.open(data,'_blank');return;}
+    var idx=data.indexOf('/racuni/');
+    if(idx>=0){window.open('http://localhost:8765/racuni/'+data.substring(idx+8),'_blank');return;}
+    window.open(data,'_blank');return;
+  }
+  var a=document.createElement('a');a.href=data;a.download=e.attachment.name;a.click();
 }
-
 function selectUser(u){
   selU=u;
   document.querySelectorAll('.user-btn').forEach(function(b){b.classList.remove('sel');});
@@ -959,6 +962,36 @@ function pickAttach(i){
           tf.name=file.name;
           extractAmountFromAttach(tf,i);
         }
+      });
+    };
+r.onload=function(ev){
+      var fullData=ev.target.result;
+      var b64=fullData.split(',')[1];
+      var mediaType=file.type||'application/pdf';
+      // Upload to server/DB
+      fetch(SERVER_URL+'/upload-attachment',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({entry_id:String(entries[i].id),filename:file.name,data:fullData})
+      })
+      .then(function(r2){return r2.json();})
+      .then(function(d){
+        if(d.ok&&d.url){
+          entries[i].attachment={name:file.name,data:SERVER_URL+d.url};
+        }else{
+          // Fallback to localStorage
+          var key='gie_att_'+entries[i].id;
+          try{localStorage.setItem(key,fullData);}catch(ex){}
+          entries[i].attachment={name:file.name,key:key};
+        }
+        save();render();picker.value='';
+        extractAmountFromAttach(SERVER_URL+(d.url||''),i);
+      })
+      .catch(function(){
+        var key='gie_att_'+entries[i].id;
+        try{localStorage.setItem(key,fullData);}catch(ex){}
+        entries[i].attachment={name:file.name,key:key};
+        save();render();picker.value='';
       });
     };
     r.readAsDataURL(file);

@@ -941,29 +941,6 @@ function pickAttach(i){
     if(file.name.toLowerCase().endsWith('.pdf'))mediaType='application/pdf';
     if(file.name.toLowerCase().endsWith('.jpg')||file.name.toLowerCase().endsWith('.jpeg'))mediaType='image/jpeg';
     if(file.name.toLowerCase().endsWith('.png'))mediaType='image/png';
-    var r=new FileReader();
-    r.onload=function(ev){
-      var b64=ev.target.result.split(',')[1];
-      _pdfSavedName=null;
-      checkPdfPages(b64,file.name,function(finalB64){
-        var savedName=_pdfSavedName||null;
-        var key='gie_att_'+entries[i].id;
-        if(savedName){
-          var url='http://localhost:8765/racuni/'+savedName.replace(/ /g,'%20');
-          entries[i].attachment={name:file.name,data:url};
-          save();render();picker.value='';
-          extractAmountFromAttach(url,i);
-        }else{
-          var fullData='data:'+mediaType+';base64,'+finalB64;
-          try{localStorage.setItem(key,fullData);}catch(ex){}
-          entries[i].attachment={name:file.name,key:key};
-          save();render();picker.value='';
-          var tf=new Blob([Uint8Array.from(atob(finalB64),function(ch){return ch.charCodeAt(0);})],{type:mediaType});
-          tf.name=file.name;
-          extractAmountFromAttach(tf,i);
-        }
-      });
-    };
 r.onload=function(ev){
       var fullData=ev.target.result;
       var b64=fullData.split(',')[1];

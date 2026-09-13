@@ -635,7 +635,7 @@ function filteredEntries(){
 }
 function render(){
   var u=USERS[cu];
-var ve=viewEntries().filter(function(e){var y=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);return !y||y===cYear;});
+var ve=viewEntries().filter(function(e){var y=e.due?new Date(e.due).getFullYear():(e.date?new Date(e.date).getFullYear():0);return y===cYear;});
   var rows=filteredEntries();
   var showOwner=(cview==='vse')&&u.admin;
 // isReadOnly defined per-row below

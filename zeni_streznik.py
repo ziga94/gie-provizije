@@ -166,6 +166,43 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(result)
 
+
+        elif self.path.startswith('/get-attachment/'):
+            entry_id = self.path[16:]
+            try:
+                conn = get_db()
+                if conn:
+                    cur = conn.cursor()
+                    cur.execute("SELECT filename, data FROM attachments WHERE entry_id = %s", (entry_id,))
+                    row = cur.fetchone()
+                    cur.close()
+                    conn.close()
+                    if row:
+                        filename, data = row
+                        # Decode base64
+                        import base64
+                        if ',' in data:
+                            data = data.split(',')[1]
+                        file_data = base64.b64decode(data)
+                        self.send_response(200)
+                        if filename.lower().endswith('.pdf'):
+                            self.send_header('Content-Type', 'application/pdf')
+                        else:
+                            self.send_header('Content-Type', 'application/octet-stream')
+                        self.send_header('Content-Disposition', 'inline; filename="{}"'.format(filename))
+                        self.send_header('Content-Length', len(file_data))
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.end_headers()
+                        self.wfile.write(file_data)
+                        return
+                    else:
+                        self.send_error(404, 'Attachment not found')
+                else:
+                    self.send_error(500, 'No database')
+            except Exception as e:
+                self.send_error(500, str(e))
+
+
         elif self.path == '/ping':
             self.respond(200, {'ok': True})
 
@@ -194,10 +231,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif self.path.startswith('/rate/'):
             currency = self.path[6:].upper()
             try:
-                url = 'https://open.er-api.com/v6/latest/{}'.format(currency)
+                url = 'https://api.exchangerate.host/latest?base={}&symbols=EUR'.format(currency)
                 req = urllib.request.urlopen(url, timeout=5)
                 data = json.loads(req.read())
-                rate = data['rates']['EUR']  # open.er-api.com
+                rate = data['rates']['EUR']
                 self.respond(200, {'rate': rate, 'currency': currency})
                 print("  Tecaj {}/EUR: {}".format(currency, rate))
             except Exception as ex:
@@ -439,7 +476,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 currency = data.get('currency', 'EUR').upper()
                 if currency != 'EUR':
                     try:
-                        url = 'https://open.er-api.com/v6/latest/{}'.format(currency)
+                        url = 'https://api.exchangerate.host/latest?base={}&symbols=EUR'.format(currency)
                         rate_req = urllib.request.urlopen(url, timeout=5)
                         rate_data = json.loads(rate_req.read())
                         rate = rate_data['rates']['EUR']

@@ -26,7 +26,10 @@ if not DATABASE_URL:
 
 def get_db():
     """Get PostgreSQL connection."""
-    import psycopg2
+    try:
+        import psycopg2
+    except ImportError:
+        return None
     # Try DATABASE_URL first
     if DATABASE_URL:
         try:

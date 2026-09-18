@@ -930,17 +930,11 @@ function inlineEdit(i,field,span){
 function pickAttach(i){
   var picker=document.getElementById('file-picker');
   picker.onchange=function(){
-    var file=picker.files[0];
-    if(!file)return;
-    var mediaType=file.type||'application/pdf';
-    if(file.name.toLowerCase().endsWith('.pdf'))mediaType='application/pdf';
-    if(file.name.toLowerCase().endsWith('.jpg')||file.name.toLowerCase().endsWith('.jpeg'))mediaType='image/jpeg';
-    if(file.name.toLowerCase().endsWith('.png'))mediaType='image/png';
-r.onload=function(ev){
+    var file=picker.files[0];if(!file)return;
+    var r=new FileReader();
+    r.onload=function(ev){
       var fullData=ev.target.result;
-      var b64=fullData.split(',')[1];
-      var mediaType=file.type||'application/pdf';
-      // Upload to server/DB
+      // Try server upload first, fallback to localStorage
       fetch(SERVER_URL+'/upload-attachment',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -951,15 +945,14 @@ r.onload=function(ev){
         if(d.ok&&d.url){
           entries[i].attachment={name:file.name,data:SERVER_URL+d.url};
         }else{
-          // Fallback to localStorage
           var key='gie_att_'+entries[i].id;
           try{localStorage.setItem(key,fullData);}catch(ex){}
           entries[i].attachment={name:file.name,key:key};
         }
         save();render();picker.value='';
-        extractAmountFromAttach(SERVER_URL+(d.url||''),i);
       })
       .catch(function(){
+        // Fallback to localStorage
         var key='gie_att_'+entries[i].id;
         try{localStorage.setItem(key,fullData);}catch(ex){}
         entries[i].attachment={name:file.name,key:key};

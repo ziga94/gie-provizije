@@ -13,6 +13,16 @@ import os
 PORT = int(os.environ.get("PORT", 8765))
 API_KEY_FILE = "gie_api_key.txt"
 DATABASE_URL = os.environ.get("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
+if not DATABASE_URL:
+    # Try to build from individual Postgres env vars
+    pghost = os.environ.get("PGHOST", "")
+    pgport = os.environ.get("PGPORT", "5432")
+    pguser = os.environ.get("PGUSER", "")
+    pgpassword = os.environ.get("PGPASSWORD", "")
+    pgdatabase = os.environ.get("PGDATABASE", "")
+    if pghost and pguser and pgpassword and pgdatabase:
+        DATABASE_URL = "postgresql://{}:{}@{}:{}/{}".format(pguser, pgpassword, pghost, pgport, pgdatabase)
+        print("  Zgradjen DATABASE_URL iz PGHOST/PGUSER/...")
 
 def get_db():
     """Get PostgreSQL connection."""

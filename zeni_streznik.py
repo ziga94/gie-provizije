@@ -12,7 +12,7 @@ import os
 
 PORT = int(os.environ.get("PORT", 8765))
 API_KEY_FILE = "gie_api_key.txt"
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+DATABASE_URL = os.environ.get("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
 
 def get_db():
     """Get PostgreSQL connection."""

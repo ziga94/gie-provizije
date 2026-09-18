@@ -26,12 +26,31 @@ if not DATABASE_URL:
 
 def get_db():
     """Get PostgreSQL connection."""
+    import psycopg2
+    # Try DATABASE_URL first
     if DATABASE_URL:
         try:
-            import psycopg2
-            return psycopg2.connect(DATABASE_URL, sslmode='require')
+            conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+            return conn
         except Exception as e:
-            print("  DB napaka:", e)
+            print("  DB napaka z DATABASE_URL:", e)
+    # Try individual PG vars
+    pghost = os.environ.get("PGHOST", "")
+    pgport = os.environ.get("PGPORT", "5432")
+    pguser = os.environ.get("PGUSER", "")
+    pgpassword = os.environ.get("PGPASSWORD", "")
+    pgdatabase = os.environ.get("PGDATABASE", "")
+    if pghost and pguser:
+        try:
+            conn = psycopg2.connect(
+                host=pghost, port=pgport, user=pguser,
+                password=pgpassword, dbname=pgdatabase,
+                sslmode='require'
+            )
+            print("  DB povezan prek PGHOST")
+            return conn
+        except Exception as e:
+            print("  DB napaka z PGHOST:", e)
     return None
 
 def init_db():

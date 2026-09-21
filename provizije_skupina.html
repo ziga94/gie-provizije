@@ -1322,7 +1322,7 @@ function showCtxMenu(ev,i){
     items.push({label:'< Vrni na Racun dodan',action:function(){entry.paid=false;entry.narejen=false;save();render();}});
     items.push({label:'< Vrni na Vneseno',action:function(){entry.paid=false;entry.narejen=false;if(entry.attachment){delete entry.attachment;delete entry.seed_items;delete entry.qty;}save();render();}});
   }else if(entry.attachment){
-    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;save();render();}});
+    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';save();render();}});
   }
   if(!items.length){hideCtxMenu();return;}
   var menu=document.getElementById('ctx-menu');

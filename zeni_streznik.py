@@ -141,7 +141,7 @@ PROMPT = (
     "Preberi ta racun in vrni SAMO JSON objekt brez kakrsnega koli besedila."
     " Poisce: datum racuna (date YYYY-MM-DD), datum zapadlosti (due YYYY-MM-DD pri Due date, Scadenze ali Bank transfer),"
     " stevilko racuna (invoice), valuto (currency: EUR/USD/GBP itd),"
-    " skupni znesek v originalni valuti (amount_orig = Total to pay ali Total Amount)."" POMEMBNO: Stevila so v evropskem formatu: 42.800,00 pomeni 42800.00 (pika = locilo tisoc, vejica = decimalno locilo)."" Vrni VEDNO numericno vrednost brez pik in vejic: 42800.00 ne 42.800,00."
+    " skupni znesek v originalni valuti (amount_orig = Total to pay ali Total Amount ali Grand Total - VKLJUCNO s transportom in vsemi postavkami)."" POMEMBNO: Stevila so v evropskem formatu: 42.800,00 pomeni 42800.00 (pika = locilo tisoc, vejica = decimalno locilo)."" Vrni VEDNO numericno vrednost brez pik in vejic: 42800.00 ne 42.800,00."
     " KLJUCNO - NAKUP ali PRODAJA:"
     " Ce je kupec Continental Semences ali Continental Semences Spa -> je_nakup=true, client=ime prodajalca."
     " Ce je Continental prodajalec -> je_nakup=false, client=ime kupca."
@@ -577,6 +577,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     self.respond(400, {'error': 'No JSON in response'})
                     return
                 data = json.loads(raw[start:end+1])
+                
+                # Fix European number format (42.800,00 -> 42800.00)
+                def fix_num(val):
+                    if isinstance(val, str):
+                        # Remove thousand separators (dots before 3 digits), convert comma to dot
+                        import re
+                        val = re.sub(r'\.(?=\d{3}(?:[,.]|$))', '', val)
+                        val = val.replace(',', '.')
+                        try: return float(val)
+                        except: return 0
+                    return val
+                
+                if data.get('amount'): data['amount'] = fix_num(data['amount'])
+                if data.get('amount_orig'): data['amount_orig'] = fix_num(data['amount_orig'])
+                print("  Raw amount after fix:", data.get('amount'), data.get('amount_orig'))
 
                 # Categorize items
                 forage_amount = 0

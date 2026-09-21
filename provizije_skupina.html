@@ -934,6 +934,7 @@ function pickAttach(i){
     var r=new FileReader();
     r.onload=function(ev){
       var fullData=ev.target.result;
+      // Save to server
       fetch(SERVER_URL+'/upload-attachment',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -949,6 +950,7 @@ function pickAttach(i){
           entries[i].attachment={name:file.name,key:key};
         }
         save();render();picker.value='';
+        // Scan with AI using the original file object
         extractAmountFromAttach(file,i);
       })
       .catch(function(){

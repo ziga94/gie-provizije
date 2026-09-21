@@ -966,6 +966,8 @@ function pickAttach(i){
   picker.click();
 }
 function extractAmountFromAttach(file,i){
+  // Save original data before AI overwrites it
+  if(!entries[i]._orig)entries[i]._orig={client:entries[i].client,amount:entries[i].amount,commission:entries[i].commission,date:entries[i].date,due:entries[i].due,invoice:entries[i].invoice};
   if(typeof file==='string'&&file.startsWith('http')){
     fetch(file).then(function(r){return r.blob();}).then(function(blob){
       var f2=new File([blob],entries[i].attachment?entries[i].attachment.name:'racun.pdf',{type:'application/pdf'});
@@ -1324,9 +1326,9 @@ function showCtxMenu(ev,i){
     items.push({label:'< Vrni na Obdelano',action:function(){entry.narejen=false;save();render();}});
   }else if(entry.paid){
     items.push({label:'< Vrni na Racun dodan',action:function(){entry.paid=false;entry.narejen=false;save();render();}});
-    items.push({label:'< Vrni na Vneseno',action:function(){entry.paid=false;entry.narejen=false;delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';entry.date='';save();render();}});
+    items.push({label:'< Vrni na Vneseno',action:function(){entry.paid=false;entry.narejen=false;delete entry.attachment;delete entry.seed_items;delete entry.qty;if(entry._orig){entry.client=entry._orig.client;entry.amount=entry._orig.amount;entry.commission=entry._orig.commission;entry.date=entry._orig.date||'';entry.due=entry._orig.due||'';entry.invoice=entry._orig.invoice||'';}else{entry.invoice='';entry.due='';entry.date='';}delete entry._orig;save();render();}});
   }else if(entry.attachment){
-    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';entry.date='';entry.client=entry.client||'';save();render();}});
+    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;if(entry._orig){entry.client=entry._orig.client;entry.amount=entry._orig.amount;entry.commission=entry._orig.commission;entry.date=entry._orig.date||'';entry.due=entry._orig.due||'';entry.invoice=entry._orig.invoice||'';}else{entry.invoice='';entry.due='';entry.date='';}delete entry._orig;entry.client=entry.client||'';save();render();}});
   }
   if(!items.length){hideCtxMenu();return;}
   var menu=document.getElementById('ctx-menu');

@@ -605,8 +605,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         total_qty += qty
                         if any(w in desc for w in ['MIX', 'MIXTURE', 'BLEND']):
                             mixture_amount += net
-                        elif desc not in ['FREIGHT', 'TRANSPORT', 'PACKING']:
-                            forage_amount += net
+                        else:
+                            forage_amount += net  # includes freight/transport
 
                 data['forage_amount'] = round(forage_amount, 2)
                 data['mixture_amount'] = round(mixture_amount, 2)

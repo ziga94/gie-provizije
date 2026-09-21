@@ -1037,6 +1037,19 @@ function removeAttach(i){
   delete entries[i].attachment;
   delete entries[i].seed_items;
   delete entries[i].qty;
+  if(entries[i]._orig){
+    entries[i].client=entries[i]._orig.client;
+    entries[i].amount=entries[i]._orig.amount;
+    entries[i].commission=entries[i]._orig.commission;
+    entries[i].date=entries[i]._orig.date||'';
+    entries[i].due=entries[i]._orig.due||'';
+    entries[i].invoice=entries[i]._orig.invoice||'';
+    delete entries[i]._orig;
+  }else{
+    entries[i].invoice='';
+    entries[i].due='';
+    entries[i].date='';
+  }
   save();render();
 }
 function getClients(){

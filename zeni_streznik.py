@@ -598,16 +598,26 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 mixture_amount = 0
                 total_qty = 0
                 if data.get('items') and not data.get('je_nakup'):
+                    seed_forage = 0
+                    seed_mixture = 0
+                    freight_total = 0
                     for item in data['items']:
                         desc = (item.get('desc') or '').upper()
                         net = float(item.get('net') or 0)
                         qty = float(item.get('qty') or 0)
                         total_qty += qty
-                        if any(w in desc for w in ['MIX', 'MIXTURE', 'BLEND']):
-                            mixture_amount += net
+                        if any(w in desc for w in ['FREIGHT', 'TRANSPORT', 'PACKING']):
+                            freight_total += net
+                        elif any(w in desc for w in ['MIX', 'MIXTURE', 'BLEND']):
+                            seed_mixture += net
                         else:
-                            forage_amount += net  # includes freight/transport
-
+                            seed_forage += net
+                    if seed_mixture > seed_forage:
+                        mixture_amount = seed_mixture + freight_total
+                        forage_amount = seed_forage
+                    else:
+                        forage_amount = seed_forage + freight_total
+                        mixture_amount = seed_mixture
                 data['forage_amount'] = round(forage_amount, 2)
                 data['mixture_amount'] = round(mixture_amount, 2)
                 data['total_qty'] = round(total_qty, 2)

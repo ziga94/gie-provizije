@@ -987,7 +987,11 @@ fetch(SERVER_URL+'/scan',{method:'POST',headers:{'Content-Type':'application/jso
     .then(function(data){
       if(data.date)entries[i].date=data.date;
       if(data.due)entries[i].due=data.due;
-      if(data.invoice)entries[i].invoice=data.invoice;
+if(data.invoice){
+  var dupInv=entries.find(function(e,idx){return idx!==i&&e.invoice&&e.invoice.trim().toLowerCase()===data.invoice.trim().toLowerCase();});
+  if(dupInv){if(!confirm('Racun '+data.invoice+' je ze vnesen pri stranki: '+(dupInv.client||'—')+'!\nVseeno nadaljujes?')){delete entries[i].attachment;save();render();return;}}
+  entries[i].invoice=data.invoice;
+}
       if(data.client)entries[i].client=data.client;
       if(data.items&&data.items.length)entries[i].seed_items=data.items;
       if(data.total_qty)entries[i].qty=data.total_qty;

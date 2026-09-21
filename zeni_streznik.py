@@ -235,6 +235,39 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.send_error(500, str(e))
 
 
+
+        elif self.path.startswith('/get-attachment/'):
+            entry_id = self.path[16:]
+            try:
+                conn = get_db()
+                if conn:
+                    cur = conn.cursor()
+                    cur.execute("SELECT filename, data FROM attachments WHERE entry_id = %s", (entry_id,))
+                    row = cur.fetchone()
+                    cur.close()
+                    conn.close()
+                    if row:
+                        import base64
+                        filename, data = row
+                        if ',' in data:
+                            data = data.split(',')[1]
+                        file_data = base64.b64decode(data)
+                        self.send_response(200)
+                        if filename.lower().endswith('.pdf'):
+                            self.send_header('Content-Type', 'application/pdf')
+                        else:
+                            self.send_header('Content-Type', 'application/octet-stream')
+                        self.send_header('Content-Disposition', 'inline; filename="{}"'.format(filename))
+                        self.send_header('Content-Length', len(file_data))
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.end_headers()
+                        self.wfile.write(file_data)
+                        return
+                self.send_error(404, 'Not found')
+            except Exception as e:
+                self.send_error(500, str(e))
+
+
         elif self.path == '/ping':
             self.respond(200, {'ok': True})
 
@@ -299,6 +332,66 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(result)
+
+
+        elif self.path == '/upload-attachment':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length)
+            try:
+                req = json.loads(body)
+                filename = req.get('filename', 'racun.pdf')
+                data = req.get('data', '')
+                entry_id = req.get('entry_id', '')
+                conn = get_db()
+                if conn:
+                    cur = conn.cursor()
+                    cur.execute("""CREATE TABLE IF NOT EXISTS attachments (entry_id TEXT PRIMARY KEY, filename TEXT, data TEXT, created_at TIMESTAMP DEFAULT NOW())""")
+                    cur.execute("INSERT INTO attachments (entry_id, filename, data) VALUES (%s, %s, %s) ON CONFLICT (entry_id) DO UPDATE SET filename=%s, data=%s", (entry_id, filename, data, filename, data))
+                    conn.commit()
+                    cur.close()
+                    conn.close()
+                    result = json.dumps({'ok': True, 'url': '/get-attachment/'+str(entry_id)}).encode('utf-8')
+                    print("  Priponka shranjena: {}".format(filename))
+                else:
+                    result = json.dumps({'ok': False, 'error': 'No DB'}).encode('utf-8')
+            except Exception as e:
+                print("  Napaka upload:", e)
+                result = json.dumps({'ok': False, 'error': str(e)}).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', len(result))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(result)
+
+
+        elif self.path.startswith('/get-attachment/'):
+            entry_id = self.path[16:]
+            try:
+                conn = get_db()
+                if conn:
+                    cur = conn.cursor()
+                    cur.execute("SELECT filename, data FROM attachments WHERE entry_id = %s", (entry_id,))
+                    row = cur.fetchone()
+                    cur.close()
+                    conn.close()
+                    if row:
+                        import base64
+                        filename, data = row
+                        if ',' in data:
+                            data = data.split(',')[1]
+                        file_data = base64.b64decode(data)
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/pdf' if filename.lower().endswith('.pdf') else 'application/octet-stream')
+                        self.send_header('Content-Disposition', 'inline; filename="{}"'.format(filename))
+                        self.send_header('Content-Length', len(file_data))
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.end_headers()
+                        self.wfile.write(file_data)
+                        return
+                self.send_error(404)
+            except Exception as e:
+                self.send_error(500, str(e))
 
         elif self.path == '/pdf-info':
             length = int(self.headers.get('Content-Length', 0))

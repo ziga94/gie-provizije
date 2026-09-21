@@ -1001,7 +1001,9 @@ function askAmount(i,detected,foundDate,foundDue,forageAmt,mixtureAmt){
     openBreakdown(forageAmt,mixtureAmt,0,function(result){
       entries[i].amount=result.amount;entries[i].commission=result.commission;entries[i].product=result.product;
       var curDate=entries[i].date||new Date().toISOString().slice(0,10);
-      var newDate=prompt('Datum racuna (LLLL-MM-DD):',foundDate||curDate);
+var newClient=prompt('Stranka:',entries[i].client||'');
+if(newClient!==null&&newClient.trim()!='')entries[i].client=newClient.trim();
+var curDate=entries[i].date||new Date().toISOString().slice(0,10);
       if(newDate!==null&&newDate.trim()!==''){
         var d=newDate.trim();
         if(d.indexOf('.')>0){var parts=d.split('.');if(parts.length===3)d=parts[2].trim()+'-'+parts[1].trim().padStart(2,'0')+'-'+parts[0].trim().padStart(2,'0');}
@@ -1017,7 +1019,9 @@ function askAmount(i,detected,foundDate,foundDue,forageAmt,mixtureAmt){
     var parsed=parseFloat(newAmt.replace(',','.'));
     if(!isNaN(parsed)&&parsed>0){entries[i].amount=parsed;var pct2=PROD[entries[i].product]||0;entries[i].commission=Math.round(parsed*pct2*100)/10000;}
   }
-  var curDate=entries[i].date||new Date().toISOString().slice(0,10);
+var newClient2=prompt('Stranka:',entries[i].client||'');
+if(newClient2!==null&&newClient2.trim()!='')entries[i].client=newClient2.trim();
+var curDate=entries[i].date||new Date().toISOString().slice(0,10);
   var newDate=prompt('Datum racuna (LLLL-MM-DD):',foundDate||curDate);
   if(newDate!==null&&newDate.trim()!==''){
     var d=newDate.trim();
@@ -1320,9 +1324,9 @@ function showCtxMenu(ev,i){
     items.push({label:'< Vrni na Obdelano',action:function(){entry.narejen=false;save();render();}});
   }else if(entry.paid){
     items.push({label:'< Vrni na Racun dodan',action:function(){entry.paid=false;entry.narejen=false;save();render();}});
-    items.push({label:'< Vrni na Vneseno',action:function(){entry.paid=false;entry.narejen=false;if(entry.attachment){delete entry.attachment;delete entry.seed_items;delete entry.qty;}save();render();}});
+    items.push({label:'< Vrni na Vneseno',action:function(){entry.paid=false;entry.narejen=false;delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';entry.date='';save();render();}});
   }else if(entry.attachment){
-    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';save();render();}});
+    items.push({label:'< Vrni na Vneseno',action:function(){delete entry.attachment;delete entry.seed_items;delete entry.qty;entry.invoice='';entry.due='';entry.date='';entry.client=entry.client||'';save();render();}});
   }
   if(!items.length){hideCtxMenu();return;}
   var menu=document.getElementById('ctx-menu');

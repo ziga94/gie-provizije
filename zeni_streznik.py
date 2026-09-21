@@ -141,7 +141,7 @@ PROMPT = (
     "Preberi ta racun in vrni SAMO JSON objekt brez kakrsnega koli besedila."
     " Poisce: datum racuna (date YYYY-MM-DD), datum zapadlosti (due YYYY-MM-DD pri Due date, Scadenze ali Bank transfer),"
     " stevilko racuna (invoice), valuto (currency: EUR/USD/GBP itd),"
-    " skupni znesek v originalni valuti (amount_orig = Total to pay)."
+    " skupni znesek v originalni valuti (amount_orig = Total to pay ali Total Amount)."" POMEMBNO: Stevila so v evropskem formatu: 42.800,00 pomeni 42800.00 (pika = locilo tisoc, vejica = decimalno locilo)."" Vrni VEDNO numericno vrednost brez pik in vejic: 42800.00 ne 42.800,00."
     " KLJUCNO - NAKUP ali PRODAJA:"
     " Ce je kupec Continental Semences ali Continental Semences Spa -> je_nakup=true, client=ime prodajalca."
     " Ce je Continental prodajalec -> je_nakup=false, client=ime kupca."

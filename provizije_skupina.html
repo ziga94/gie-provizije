@@ -1372,6 +1372,15 @@ function editSupplierMain(i,span){
   inp.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();commit();}if(ev.key==='Escape')render();});
   inp.addEventListener('blur',function(){setTimeout(commit,100);});
 }
+function showOverdue(uid){
+  var overdue=entries.filter(function(e){return e.owner===uid&&od(e);});
+  if(!overdue.length){alert('Ni zamud.');return;}
+  var msg='Zamude za '+USERS[uid].name+':\n\n';
+  overdue.forEach(function(e){
+    msg+=(e.client||'—')+' | '+fmt(e.commission)+' | Zapadlost: '+fmtD(e.due)+'\n';
+  });
+  alert(msg);
+}
 function toggleNegotovo(i){entries[i].negotovo=!entries[i].negotovo;save();render();}
 function hideCtxMenu(){document.getElementById('ctx-menu').style.display='none';}
 document.addEventListener('click',hideCtxMenu);

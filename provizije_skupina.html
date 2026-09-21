@@ -980,7 +980,7 @@ function extractAmountFromAttach(file,i){
   var r=new FileReader();
   r.onload=function(ev){
     var b64=ev.target.result.split(',')[1];
-    fetch('http://localhost:8765/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:b64,media_type:mediaType})})
+fetch(SERVER_URL+'/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:b64,media_type:mediaType})})
     .then(function(resp){return resp.json();})
     .then(function(data){
       if(data.date)entries[i].date=data.date;

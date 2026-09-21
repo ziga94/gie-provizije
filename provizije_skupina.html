@@ -999,41 +999,33 @@ fetch(SERVER_URL+'/scan',{method:'POST',headers:{'Content-Type':'application/jso
   r.readAsDataURL(file);
 }
 function askAmount(i,detected,foundDate,foundDue,forageAmt,mixtureAmt){
-  if(forageAmt>0||mixtureAmt>0){
-    openBreakdown(forageAmt,mixtureAmt,0,function(result){
-      entries[i].amount=result.amount;entries[i].commission=result.commission;entries[i].product=result.product;
-      var curDate=entries[i].date||new Date().toISOString().slice(0,10);
-var newClient=prompt('Stranka:',entries[i].client||'');
-if(newClient!==null&&newClient.trim()!='')entries[i].client=newClient.trim();
-var curDate=entries[i].date||new Date().toISOString().slice(0,10);
-      if(newDate!==null&&newDate.trim()!==''){
-        var d=newDate.trim();
-        if(d.indexOf('.')>0){var parts=d.split('.');if(parts.length===3)d=parts[2].trim()+'-'+parts[1].trim().padStart(2,'0')+'-'+parts[0].trim().padStart(2,'0');}
-        if(d.length===10)entries[i].date=d;
-      }
-      save();render();
-    });
-    return;
-  }
-  var curAmt=entries[i].amount||0;
-  var newAmt=prompt(detected?'Zaznan znesek: '+detected.toFixed(2)+' EUR\nVpisi koncni znesek:':'Vpisi znesek racuna (EUR):',(detected||curAmt).toString());
-  if(newAmt!==null&&newAmt.trim()!==''){
-    var parsed=parseFloat(newAmt.replace(',','.'));
-    if(!isNaN(parsed)&&parsed>0){entries[i].amount=parsed;var pct2=PROD[entries[i].product]||0;entries[i].commission=Math.round(parsed*pct2*100)/10000;}
-  }
-var newClient2=prompt('Stranka:',entries[i].client||'');
-if(newClient2!==null&&newClient2.trim()!='')entries[i].client=newClient2.trim();
-var curDate=entries[i].date||new Date().toISOString().slice(0,10);
-  var newDate=prompt('Datum racuna (LLLL-MM-DD):',foundDate||curDate);
-  if(newDate!==null&&newDate.trim()!==''){
-    var d=newDate.trim();
-    if(d.indexOf('.')>0){var parts=d.split('.');if(parts.length===3)d=parts[2].trim()+'-'+parts[1].trim().padStart(2,'0')+'-'+parts[0].trim().padStart(2,'0');}
-    if(d.length===10)entries[i].date=d;
-  }
-  save();render();
+if(forageAmt>0||mixtureAmt>0){
+  openBreakdown(forageAmt,mixtureAmt,0,function(result){
+    entries[i].amount=result.amount;entries[i].commission=result.commission;entries[i].product=result.product;
+    var nc=prompt('Stranka:',entries[i].client||'');
+    if(nc!==null&&nc.trim()!='')entries[i].client=nc.trim();
+    var nd=prompt('Datum racuna (LLLL-MM-DD):',foundDate||entries[i].date||new Date().toISOString().slice(0,10));
+    if(nd!==null&&nd.trim()!=''){var d=nd.trim();if(d.indexOf('.')>0){var p=d.split('.');if(p.length===3)d=p[2].trim()+'-'+p[1].trim().padStart(2,'0')+'-'+p[0].trim().padStart(2,'0');}if(d.length===10)entries[i].date=d;}
+    if(foundDue)entries[i].due=foundDue;
+    save();render();
+  });
+  return;
+}
+// Normal amount
+var curAmt=entries[i].amount||0;
+var newAmt=prompt(detected?'Zaznan znesek: '+detected.toFixed(2)+' EUR\nVpisi koncni znesek:':'Vpisi znesek racuna (EUR):',detected||curAmt);
+if(newAmt!==null&&newAmt.trim()!=''){
+  var parsed=parseFloat(String(newAmt).replace(',','.'));
+  if(!isNaN(parsed)&&parsed>0){entries[i].amount=parsed;var pct2=PROD[entries[i].product]||0;entries[i].commission=Math.round(parsed*pct2*100)/10000;}
+}
+var nc2=prompt('Stranka:',entries[i].client||'');
+if(nc2!==null&&nc2.trim()!='')entries[i].client=nc2.trim();
+var nd2=prompt('Datum racuna (LLLL-MM-DD):',foundDate||entries[i].date||new Date().toISOString().slice(0,10));
+if(nd2!==null&&nd2.trim()!=''){var d2=nd2.trim();if(d2.indexOf('.')>0){var p2=d2.split('.');if(p2.length===3)d2=p2[2].trim()+'-'+p2[1].trim().padStart(2,'0')+'-'+p2[0].trim().padStart(2,'0');}if(d2.length===10)entries[i].date=d2;}
+if(foundDue)entries[i].due=foundDue;
+save();render();
 }
 function removeAttach(i){
-  if(!confirm('Odstrani priponko?'))return;
   delete entries[i].attachment;
   delete entries[i].seed_items;
   delete entries[i].qty;

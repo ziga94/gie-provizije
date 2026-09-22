@@ -592,6 +592,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if data.get('amount'): data['amount'] = fix_num(data['amount'])
                 if data.get('amount_orig'): data['amount_orig'] = fix_num(data['amount_orig'])
                 print("  Raw amount after fix:", data.get('amount'), data.get('amount_orig'))
+                
+                # If amount is 0 but amount_orig has value, use amount_orig
+                if not data.get('amount') and data.get('amount_orig'):
+                    data['amount'] = data['amount_orig']
 
                 # Categorize items
                 forage_amount = 0

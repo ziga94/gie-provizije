@@ -822,7 +822,7 @@ if(document.getElementById('f-supplier'))document.getElementById('f-supplier').v
     if(_exRates[currency]){
       doAdd(_exRates[currency]);
     }else{
-      fetch('http://localhost:8765/rate/'+currency)
+      fetch(SERVER_URL+'/rate/'+currency)
       .then(function(r){return r.json();})
       .then(function(d){
         if(d.rates&&d.rates.EUR){_exRates[currency]=1/d.rates.EUR;doAdd(_exRates[currency]);}
@@ -1136,7 +1136,7 @@ function quickImport(){
         _qiData.b64=finalB64;
         _qiData.mediaType=mediaType;
         _qiData.savedName=_pdfSavedName||null;
-        fetch('http://localhost:8765/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:finalB64,media_type:mediaType})})
+        fetch(SERVER_URL+'/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:finalB64,media_type:mediaType})})
         .then(function(resp){return resp.json();})
         .then(function(data){
           _qiData=data;_qiData.b64=finalB64;_qiData.mediaType=mediaType;_qiData.savedName=_pdfSavedName||null;
@@ -1174,7 +1174,7 @@ function quickImport(){
 function cancelQuickImport(){_qiFile=null;_qiData=null;document.getElementById('product-modal').style.display='none';}
 function makeAttachment(entry,file,d){
   if(d.savedName){
-    var url='http://localhost:8765/racuni/'+d.savedName.replace(/ /g,'%20');
+    var url=SERVER_URL+'/racuni/'+d.savedName.replace(/ /g,'%20');
     entry.attachment={name:file.name,data:url};
   }else if(d.b64){
     var ek='gie_att_'+entry.id;
@@ -1232,7 +1232,7 @@ function saveApiKey(){
   var key=document.getElementById('api-key-input').value.trim();
   var msg=document.getElementById('api-msg');
   if(!key||key.indexOf('sk-ant')<0){msg.textContent='Kljuc mora zaceti s sk-ant-...';msg.className='modal-msg err';return;}
-  fetch('http://localhost:8765/setkey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key})})
+  fetch(SERVER_URL+'/setkey',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key})})
   .then(function(r){return r.json();})
   .then(function(d){if(d.ok){msg.textContent='Kljuc shranjen!';msg.className='modal-msg ok';setTimeout(closeApi,1500);}else{msg.textContent='Napaka.';msg.className='modal-msg err';}})
   .catch(function(){msg.textContent='Streznik ni dosegljiv.';msg.className='modal-msg err';});
@@ -1526,7 +1526,7 @@ function confirmPdfPages(){
     if(_pdfCallback)_pdfCallback(_pdfB64);
     return;
   }
-  fetch('http://localhost:8765/extract-pages',{
+  fetch(SERVER_URL+'/extract-pages',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({file:_pdfB64,pages:selectedPages,filename:_pdfFilename||'racun.pdf'})
   })
@@ -1543,7 +1543,7 @@ function confirmPdfPages(){
 }
 function checkPdfPages(b64,filename,callback){
   if(!filename.toLowerCase().endsWith('.pdf')){callback(b64);return;}
-  fetch('http://localhost:8765/pdf-info',{
+  fetch(SERVER_URL+'/pdf-info',{
     method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({file:b64,filename:filename})
   })

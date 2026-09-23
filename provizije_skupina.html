@@ -709,7 +709,7 @@ var isReadOnly=(cu==='gorazd'&&e.owner!==cu)||USERS[cu].ro;
     var amtExtra=e.currency&&e.currency!=='EUR'&&e.amount_orig?('<br><span style="font-size:10px;color:var(--text3);">'+e.amount_orig+' '+e.currency+'</span>'):'';
     thtml+='<tr class="'+(e.paid?'paid-row':'')+'">';
     if(showOwner)thtml+='<td><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;"><span style="width:20px;height:20px;border-radius:50%;background:'+eu.bg+';color:'+eu.color+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">'+eu.initial+'</span>'+eu.name+'</span></td>';
-    thtml+='<td style="font-weight:500;'+(e.negotovo?'color:#c0392b;':'')+'"><span '+(isReadOnly?'class=""':'class="editable" onclick="inlineEdit')+'('+idx+',\'client\',this)">'+(e.client||'—')+'</span></td>';
+    thtml+='<td style="font-weight:500;'+(e.negotovo?'color:#c0392b;':'')+'"><span '+(isReadOnly?'class=""':'class="editable" onclick="inlineEdit')+'('+idx+',\'client\',this)">'+(e.client||'—')+'</span> <button onclick="editNote('+idx+')" style="background:none;border:none;cursor:pointer;font-size:12px;color:'+(e.note?'var(--pu-text)':'var(--text3)')+';padding:1px 3px;" title="'+(e.note?e.note:'Dodaj opombo')+'">📝</button></td>';
     thtml+='<td><span class="ptag '+pc+'">'+e.product+'</span></td>';
 thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="editAmount('+idx+',this)"')+' style="font-size:15px;'+(e.negotovo?'color:#c0392b;':'')+'">'+fmt(e.amount)+amtExtra+'</span></td>';
     var commExtra='';
@@ -1458,7 +1458,7 @@ function renderClientOverview(client,selYear,years){
     html+='<tr>';
     html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-weight:500;">'+p+'</td>';
     html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);">'+d.count+'</td>';
-    html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(d.totalQty>0?d.totalQty.toLocaleString()+' KG':'—')+'</td>';
+    html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(d.totalQty>0?Math.round(d.totalQty).toLocaleString()+' KG':'—')+'</td>';
     html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+fmt(d.totalAmt)+'</td>';
     html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(avg>0?fmt(avg)+'/KG':'—')+'</td>';
     html+='<td style="padding:8px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;color:var(--pu-text);font-weight:600;">'+fmt(d.totalComm)+'</td>';
@@ -1483,12 +1483,12 @@ function renderClientOverview(client,selYear,years){
       var avg2=d.totalQty>0?d.totalNet/d.totalQty:0;
       html+='<tr>';
       html+='<td style="padding:6px 10px;border-bottom:0.5px solid var(--border);">'+s+'</td>';
-      html+='<td style="padding:6px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(d.totalQty>0?d.totalQty.toLocaleString()+' KG':'—')+'</td>';
+      html+='<td style="padding:6px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(d.totalQty>0?Math.round(d.totalQty).toLocaleString()+' KG':'—')+'</td>';
       html+='<td style="padding:6px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+fmt(d.totalNet)+'</td>';
       html+='<td style="padding:6px 10px;border-bottom:0.5px solid var(--border);font-variant-numeric:tabular-nums;">'+(avg2>0?fmt(avg2)+'/KG':'—')+'</td>';
       html+='</tr>';
     });
-    html+='<tr style="background:var(--surface2);font-weight:600;"><td style="padding:8px 10px;">SKUPAJ</td><td style="padding:8px 10px;font-variant-numeric:tabular-nums;">'+(totalKg>0?totalKg.toLocaleString()+' KG':'—')+'</td><td style="padding:8px 10px;font-variant-numeric:tabular-nums;">'+fmt(totalNet)+'</td><td style="padding:8px 10px;">—</td></tr>';
+    html+='<tr style="background:var(--surface2);font-weight:600;"><td style="padding:8px 10px;">SKUPAJ</td><td style="padding:8px 10px;font-variant-numeric:tabular-nums;">'+(totalKg>0?Math.round(totalKg).toLocaleString()+' KG':'—')+'</td><td style="padding:8px 10px;font-variant-numeric:tabular-nums;">'+fmt(totalNet)+'</td><td style="padding:8px 10px;">—</td></tr>';
     html+='</tbody></table></div>';
   }
   var allYears={};
@@ -1498,7 +1498,7 @@ function renderClientOverview(client,selYear,years){
     if(!allYears[y])allYears[y]={count:0,totalAmt:0,totalQty:0};
     allYears[y].count++;
     allYears[y].totalAmt+=e.amount||0;
-    allYears[y].totalQty+=e.qty||0;
+    allYears[y].totalQty+=(e.seed_items&&e.seed_items.length?e.seed_items.reduce(function(s,item){return s+(parseFloat(item.qty)||0);},0):(e.qty||0));
   });
   html+='<div style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--border);">';
   html+='<div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px;text-transform:uppercase;">Zgodovina po letih</div>';
@@ -1509,7 +1509,7 @@ function renderClientOverview(client,selYear,years){
   html+='</tr></thead><tbody>';
   Object.keys(allYears).sort().reverse().forEach(function(y){
     var d=allYears[y];
-    html+='<tr><td style="padding:6px 10px;">'+y+'</td><td style="padding:6px 10px;">'+d.count+'</td><td style="padding:6px 10px;">'+(d.totalQty>0?d.totalQty.toLocaleString()+' KG':'—')+'</td><td style="padding:6px 10px;">'+fmt(d.totalAmt)+'</td></tr>';
+    html+='<tr><td style="padding:6px 10px;">'+y+'</td><td style="padding:6px 10px;">'+d.count+'</td><td style="padding:6px 10px;">'+(d.totalQty>0?Math.round(d.totalQty).toLocaleString()+' KG':'—')+'</td><td style="padding:6px 10px;">'+fmt(d.totalAmt)+'</td></tr>';
   });
   html+='</tbody></table></div>';
   document.getElementById('client-overview-body').innerHTML=html;

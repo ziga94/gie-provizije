@@ -383,7 +383,10 @@ footer{text-align:center;padding:1.5rem;font-size:12px;color:var(--text3);}
           </div>
         </div>
       </div>
-      <div class="form-bottom">
+      <div class="field" style="grid-column:1/-1;"><label>Opomba</label><input id="f-note" type="text" placeholder="npr. 5000 kg psenice, sorta..."></div>
+      
+      <div class="field" style="grid-column:1/-1;"><label>Opomba</label><input id="f-note" type="text" placeholder="npr. 5000 kg psenice, sorta..."></div>
+        <div class="form-bottom">
         <button class="btn primary" onclick="addEntry()"><i class="ti ti-plus"></i> Dodaj prodajo</button>
         <button class="btn" onclick="quickImport()"><i class="ti ti-file-upload"></i> Uvozi racun</button>
         <input type="file" id="quick-picker" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
@@ -789,6 +792,7 @@ function setDue(days){
 function addEntry(){
   var client=document.getElementById('f-client').value.trim();
 var supplier=document.getElementById('f-supplier')?document.getElementById('f-supplier').value.trim():'Continental Semences';
+var note=document.getElementById('f-note')?document.getElementById('f-note').value.trim():'';
   var product=document.getElementById('f-product').value;
   var currency=document.getElementById('f-currency')?document.getElementById('f-currency').value:'EUR';
   var amount=parseFloat(document.getElementById('f-amount').value);
@@ -807,7 +811,7 @@ var supplier=document.getElementById('f-supplier')?document.getElementById('f-su
       var amtEur=Math.round(amount/rate*100)/100;
       var commEur=Math.round(commissionOrig/rate*100)/100;
       var invoice2=document.getElementById('f-invoice')?document.getElementById('f-invoice').value.trim():'';
-      entries.unshift({id:Date.now(),owner:cu,client:client,product:product,amount:amtEur,commission:commEur,invoice:invoice2,date:date,due:due,paid:false,supplier:supplier,currency:currency,amount_orig:amount,exchange_rate:rate});
+      entries.unshift({id:Date.now(),owner:cu,client:client,product:product,amount:amtEur,commission:commEur,invoice:invoice2,date:date,due:due,paid:false,note:note,supplier:supplier,currency:currency,amount_orig:amount,exchange_rate:rate});
       save();render();
       document.getElementById('f-client').value='';
       document.getElementById('f-amount').value='';
@@ -817,6 +821,7 @@ var supplier=document.getElementById('f-supplier')?document.getElementById('f-su
       document.getElementById('prov-prev').style.display='none';
       if(document.getElementById('f-currency'))document.getElementById('f-currency').value='EUR';
 if(document.getElementById('f-supplier'))document.getElementById('f-supplier').value='Continental Semences';
+if(document.getElementById('f-note'))document.getElementById('f-note').value='';
       document.getElementById('f-client').focus();
     };
     if(_exRates[currency]){

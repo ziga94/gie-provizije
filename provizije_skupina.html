@@ -1382,6 +1382,14 @@ function showOverdue(uid){
   });
   alert(msg);
 }
+function editNote(i){
+  var cur=entries[i].note||'';
+  var newNote=prompt('Opomba za '+( entries[i].client||'vnos')+':', cur);
+  if(newNote!==null){
+    entries[i].note=newNote.trim();
+    save();render();
+  }
+}
 function toggleNegotovo(i){entries[i].negotovo=!entries[i].negotovo;save();render();}
 function hideCtxMenu(){document.getElementById('ctx-menu').style.display='none';}
 document.addEventListener('click',hideCtxMenu);

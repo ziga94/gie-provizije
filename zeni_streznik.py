@@ -639,8 +639,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
                                 elif "rates" in rd and "EUR" in rd["rates"]: rate = rd["rates"]["EUR"]; break
                             except: continue
                         if rate is None: raise Exception("No rate")
+                        if rate is None: raise Exception('No rate')
+                        orig = data.get('amount', 0) or 0
+                        data['amount'] = round(orig * rate, 2)
+                        data['exchange_rate'] = rate
+                        data['amount_orig'] = orig
+                        data['forage_amount'] = round(forage_amount * rate, 2)
                         data['mixture_amount'] = round(mixture_amount * rate, 2)
-                        print("  Pretvorba {} -> EUR: tecaj={}".format(currency, rate))
+                        if data.get('items'):
+                            for item in data['items']: item['net'] = round((item.get('net') or 0) * rate, 2)
                     except Exception as ex:
                         print("  Napaka pretvorbe valute:", ex)
 

@@ -630,18 +630,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 currency = data.get('currency', 'EUR').upper()
                 if currency != 'EUR':
                     try:
-                        url = 'https://api.exchangerate.host/latest?base={}&symbols=EUR'.format(currency)
-                        rate_req = urllib.request.urlopen(url, timeout=5)
-                        rate_data = json.loads(rate_req.read())
-                        rate = rate_data['rates']['EUR']
-                        orig = data.get('amount', 0) or 0
-                        data['amount'] = round(orig * rate, 2)
-                        data['exchange_rate'] = rate
-                        data['amount_orig'] = orig
-                        if data.get('items'):
-                            for item in data['items']:
-                                item['net'] = round((item.get('net') or 0) * rate, 2)
-                        data['forage_amount'] = round(forage_amount * rate, 2)
+                        rate = None
+                        for api_url in ["https://open.er-api.com/v6/latest/{}".format(currency), "https://api.frankfurter.app/latest?from={}&to=EUR".format(currency)]:
+                            try:
+                                req2 = urllib.request.urlopen(api_url, timeout=5)
+                                rd = json.loads(req2.read())
+                                if "conversion_rates" in rd and "EUR" in rd["conversion_rates"]: rate = rd["conversion_rates"]["EUR"]; break
+                                elif "rates" in rd and "EUR" in rd["rates"]: rate = rd["rates"]["EUR"]; break
+                            except: continue
+                        if rate is None: raise Exception("No rate")
                         data['mixture_amount'] = round(mixture_amount * rate, 2)
                         print("  Pretvorba {} -> EUR: tecaj={}".format(currency, rate))
                     except Exception as ex:

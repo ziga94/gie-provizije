@@ -517,7 +517,13 @@ function od(e){return e.due&&new Date(e.due)<new Date()&&!e.paid;}
 function getAttachData(e){
   if(!e.attachment)return '';
   if(e.attachment.data)return e.attachment.data;
-  if(e.attachment.key){var d=localStorage.getItem(e.attachment.key);return d||'';}
+  if(e.attachment.key){
+    var d=localStorage.getItem(e.attachment.key);
+    if(d)return d;
+    // localStorage not available (Railway) - fallback to server
+    if(e.id)return SERVER_URL+'/get-attachment/'+e.id;
+    return '';
+  }
   return '';
 }
 function getInternalAttachData(e){
@@ -530,11 +536,15 @@ function openAttach(i){
   var e=entries[i];
   if(!e.attachment)return;
   var data=getAttachData(e);
-  if(!data){alert('Priponka ni najdena.');return;}
+  if(!data){
+    // Fallback: try to open via server using entry ID
+    if(e.id){window.open(SERVER_URL+'/get-attachment/'+e.id,'_blank');return;}
+    alert('Priponka ni najdena.');return;
+  }
   if(data.startsWith('http')){
     if(data.indexOf('/get-attachment/')>=0){window.open(data,'_blank');return;}
     var idx=data.indexOf('/racuni/');
-    if(idx>=0){window.open('http://localhost:8765/racuni/'+data.substring(idx+8),'_blank');return;}
+    if(idx>=0){window.open(SERVER_URL+'/racuni/'+data.substring(idx+8),'_blank');return;}
     window.open(data,'_blank');return;
   }
   var a=document.createElement('a');a.href=data;a.download=e.attachment.name;a.click();
@@ -543,11 +553,14 @@ function openAttachByIdx(i){
   var e=entries[i];
   if(!e.attachment)return;
   var data=getAttachData(e);
-  if(!data){alert('Priponka ni najdena.');return;}
+  if(!data){
+    if(e.id){window.open(SERVER_URL+'/get-attachment/'+e.id,'_blank');return;}
+    alert('Priponka ni najdena.');return;
+  }
   if(data.startsWith('http')){
     if(data.indexOf('/get-attachment/')>=0){window.open(data,'_blank');return;}
     var idx=data.indexOf('/racuni/');
-    if(idx>=0){window.open('http://localhost:8765/racuni/'+data.substring(idx+8),'_blank');return;}
+    if(idx>=0){window.open(SERVER_URL+'/racuni/'+data.substring(idx+8),'_blank');return;}
     window.open(data,'_blank');return;
   }
   var a=document.createElement('a');a.href=data;a.download=e.attachment.name;a.click();

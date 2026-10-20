@@ -719,9 +719,14 @@ var isReadOnly=(cu==='gorazd'&&e.owner!==cu)||USERS[cu].ro;
     var statusIcon=e.narejen?'star':e.paid?'check':e.attachment?'receipt':overdue?'alert-triangle':'clock';
     var statusLabel=e.narejen?'Narejen racun':e.paid?'Obdelano':e.attachment?'Racun dodan':overdue?'Zamuda':'Vneseno';
     var seedIcon=e.seed_items&&e.seed_items.length?'&#127807;':'';
-    var amtExtra=e.currency&&e.currency!=='EUR'&&e.amount_orig?('<br><span style="font-size:10px;color:var(--text3);">'+Number(e.amount_orig).toLocaleString('sl-SI',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+e.currency+' ('+fmt(e.amount)+')</span>'):'';
-    // Override main display to show orig currency first
-    var amtDisplay=e.currency&&e.currency!=='EUR'&&e.amount_orig?(Number(e.amount_orig).toLocaleString('sl-SI',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+e.currency+'<br><span style="font-size:11px;color:var(--text3);">('+fmt(e.amount)+')</span>'):fmt(e.amount);
+    var _currSymbols={'USD':'$','GBP':'£','CHF':'CHF','SEK':'kr','DKK':'kr','NOK':'kr','TRY':'₺'};
+    var _currSym=e.currency&&_currSymbols[e.currency]?_currSymbols[e.currency]:e.currency;
+    var amtExtra='';
+    var amtDisplay=fmt(e.amount);
+    if(e.currency&&e.currency!=='EUR'&&e.amount_orig){
+      var _origFmt=_currSym+' '+Number(e.amount_orig).toLocaleString('sl-SI',{minimumFractionDigits:2,maximumFractionDigits:2});
+      amtDisplay=_origFmt+'<br><span style="font-size:11px;color:var(--text3);">('+fmt(e.amount)+')</span>';
+    }
     thtml+='<tr class="'+(e.paid?'paid-row':'')+'">';
     if(showOwner)thtml+='<td><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;"><span style="width:20px;height:20px;border-radius:50%;background:'+eu.bg+';color:'+eu.color+';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">'+eu.initial+'</span>'+eu.name+'</span></td>';
     thtml+='<td style="font-weight:500;'+(e.negotovo?'color:#c0392b;':'')+'"><span '+(isReadOnly?'class=""':'class="editable" onclick="inlineEdit')+'('+idx+',\'client\',this)">'+(e.client||'—')+'</span> <button onclick="editNote('+idx+')" style="background:none;border:none;cursor:pointer;font-size:12px;color:'+(e.note?'var(--pu-text)':'var(--text3)')+';padding:1px 3px;" title="'+(e.note?e.note:'Dodaj opombo')+'">📝</button></td>';
@@ -730,7 +735,7 @@ thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="edi
     var commExtra='';
     if(e.currency&&e.currency!=='EUR'&&e.amount_orig){
       var commOrig=Math.round(e.amount_orig*(PROD[e.product]||0)*100)/10000;
-      commExtra='<br><span style="font-size:10px;color:var(--text3);">'+commOrig.toFixed(2)+' '+e.currency+'</span>';
+      commExtra='<br><span style="font-size:10px;color:var(--text3);">('+_currSym+' '+commOrig.toFixed(2)+')</span>';
     }
 thtml+='<td class="amount"><span'+(isReadOnly?'':' class="editable" onclick="editCommission('+idx+',this)"')+' style="'+(e.negotovo?'color:#c0392b;font-weight:700;':'color:var(--pu-text);font-weight:600;')+'">'+fmt(e.commission)+commExtra+'</span></td>';
     
@@ -816,8 +821,8 @@ var note=document.getElementById('f-note')?document.getElementById('f-note').val
   var commissionOrig=isNaN(amount)?0:Math.round(amount*pct*100)/10000;
   if(currency!=='EUR'){
     var doAdd=function(rate){
-      var amtEur=Math.round(amount/rate*100)/100;
-      var commEur=Math.round(commissionOrig/rate*100)/100;
+      var amtEur=Math.round(amount*rate*100)/100;
+      var commEur=Math.round(commissionOrig*rate*100)/100;
       var invoice2=document.getElementById('f-invoice')?document.getElementById('f-invoice').value.trim():'';
       entries.unshift({id:Date.now(),owner:cu,client:client,product:product,amount:amtEur,commission:commEur,invoice:invoice2,date:date,due:due,paid:false,note:note,supplier:supplier,currency:currency,amount_orig:amount,exchange_rate:rate});
       save();render();
@@ -838,7 +843,7 @@ if(document.getElementById('f-note'))document.getElementById('f-note').value='';
       fetch(SERVER_URL+'/rate/'+currency)
       .then(function(r){return r.json();})
       .then(function(d){
-        if(d.rate){_exRates[currency]=d.rate;doAdd(_exRates[currency]);}
+        if(d.rate){_exRates[currency]=d.rate;doAdd(d.rate);}
         else{alert('Napaka pri pridobivanju tecaja.');};
       })
       .catch(function(){alert('Ni interneta za tecaj.');});

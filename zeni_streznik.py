@@ -36,7 +36,12 @@ def get_db():
             conn = psycopg2.connect(DATABASE_URL, sslmode='require')
             return conn
         except Exception as e:
-            print("  DB napaka z DATABASE_URL:", e)
+            print("  DB napaka z DATABASE_URL (ssl):", e)
+            try:
+                conn = psycopg2.connect(DATABASE_URL)
+                return conn
+            except Exception as e2:
+                print("  DB napaka z DATABASE_URL (no ssl):", e2)
     # Try individual PG vars
     pghost = os.environ.get("PGHOST", "")
     pgport = os.environ.get("PGPORT", "5432")
@@ -70,6 +75,14 @@ def init_db():
                 )
             """)
             cur.execute("INSERT INTO gie_data (id, entries) VALUES (1, '[]') ON CONFLICT (id) DO NOTHING")
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS attachments (
+                    entry_id TEXT PRIMARY KEY,
+                    filename TEXT,
+                    data TEXT,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """)
             conn.commit()
             cur.close()
             conn.close()
@@ -295,15 +308,31 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         elif self.path.startswith('/rate/'):
             currency = self.path[6:].upper()
+            rate = None
+            errors = []
+            # Try frankfurter.app first
             try:
-                url = 'https://api.exchangerate.host/latest?base={}&symbols=EUR'.format(currency)
+                url = 'https://api.frankfurter.app/latest?from={}&to=EUR'.format(currency)
                 req = urllib.request.urlopen(url, timeout=5)
                 data = json.loads(req.read())
                 rate = data['rates']['EUR']
+            except Exception as ex:
+                errors.append('frankfurter: ' + str(ex))
+            # Fallback: open.er-api.com
+            if rate is None:
+                try:
+                    url2 = 'https://open.er-api.com/v6/latest/{}'.format(currency)
+                    req2 = urllib.request.urlopen(url2, timeout=5)
+                    data2 = json.loads(req2.read())
+                    rate = data2['rates']['EUR']
+                except Exception as ex2:
+                    errors.append('er-api: ' + str(ex2))
+            if rate is not None:
                 self.respond(200, {'rate': rate, 'currency': currency})
                 print("  Tecaj {}/EUR: {}".format(currency, rate))
-            except Exception as ex:
-                self.respond(500, {'error': str(ex)})
+            else:
+                self.respond(500, {'error': '; '.join(errors)})
+                print("  Napaka tecaja:", errors)
 
         else:
             self.send_error(404)

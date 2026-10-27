@@ -777,8 +777,8 @@ function updatePrev(){
     if(curr!=='EUR'){
       if(_exRates[curr]){
         var rate=_exRates[curr];
-        var amtEur=Math.round(amt/rate*100)/100;
-        var commEur=Math.round(commOrig/rate*100)/100;
+        var amtEur=Math.round(amt*rate*100)/100;
+        var commEur=Math.round(commOrig*rate*100)/100;
         el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' = '+fmt(commEur)+' | Znesek: '+amt.toFixed(2)+' '+curr+' = '+fmt(amtEur);
       }else{
         el.textContent='Provizija: '+commOrig.toFixed(2)+' '+curr+' ('+pct+'%)';
@@ -856,8 +856,8 @@ if(document.getElementById('f-note'))document.getElementById('f-note').value='';
   var amountEur=amount;
   if(currency!=='EUR'&&_exRates[currency]){
     var rate=_exRates[currency];
-    amountEur=Math.round(amount/rate*100)/100;
-    commission=Math.round(commissionOrig/rate*100)/100;
+    amountEur=Math.round(amount*rate*100)/100;
+    commission=Math.round(commissionOrig*rate*100)/100;
   }
   var pct=PROD[product]||0;
   var commission=isNaN(amount)?0:Math.round(amount*pct*100)/10000;
